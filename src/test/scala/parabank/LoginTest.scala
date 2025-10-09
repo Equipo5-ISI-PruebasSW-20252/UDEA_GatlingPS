@@ -42,7 +42,7 @@ class LoginTest extends Simulation{
     criterio2Scenario.inject(
       nothingFor(140 seconds),                        // Time out necesario para evitar el solapamiento de pruebas
       rampUsersPerSec(10).to(200).during(45 seconds), // Rampa gradual
-      constantUsersPerSec(200).during(60 seconds),     // Sostener pico
+      constantUsersPerSec(200).during(60 seconds),
     )
   ).protocols(httpConf)
   .assertions(
@@ -56,4 +56,5 @@ class LoginTest extends Simulation{
     details("login_criterio2").responseTime.percentile(95).lte(5000),
     details("login_criterio2").successfulRequests.percent.gte(95),
   )
+
 }
