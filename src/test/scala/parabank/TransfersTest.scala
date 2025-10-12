@@ -18,8 +18,8 @@ class TransferTest extends Simulation {
     .feed(csv("transfersData.csv").circular) // Cargar el feeder desde el archivo CSV
     .exec(http("transferencia")
       .post("/transfer")
-      .queryParam("fromAccountId", "${fromAccountId}")
-      .queryParam("toAccountId", "${toAccountId}")
+      .queryParam("fromAccountId", "${fromAccount}")
+      .queryParam("toAccountId", "${toAccount}")
       .queryParam("amount", "${amount}")
       .check(status.is(200))
     )
