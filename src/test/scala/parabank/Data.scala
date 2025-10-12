@@ -8,21 +8,40 @@ object Data {
   val username = "john"
   val password = "demo"
   
-  // Cuentas existentes
+  // Cuentas existentes verificadas
   val accountIds = List(19671, 19782, 19893, 20004, 20115)
   
-  // Customer IDs
+  // Customer IDs reales verificados
   val validCustomerIds = List(18206, 18317, 18428, 18539, 18650)
   
   val accountFeeder = Iterator.continually(Map(
     "accountId" -> accountIds(Random.nextInt(accountIds.length))
   ))
   
-  // Feeder para solicitudes de préstamos
+  // Feeder para solicitudes de préstamos con datos reales
   val loanFeeder = Iterator.continually(Map(
     "customerId" -> validCustomerIds(Random.nextInt(validCustomerIds.length)).toString,
     "loanAmount" -> (1000 + Random.nextInt(50000)),
     "downPayment" -> (100 + Random.nextInt(5000)),
     "fromAccountId" -> accountIds(Random.nextInt(accountIds.length))
+  ))
+  
+  // Datos para pagos de servicios
+  val payeeNames = List("Electricidad SA", "Agua Potable", "Gas Natural", "Telefonía", "Internet Corp")
+  val cities = List("Medellín", "Bogotá", "Cali", "Barranquilla", "Cartagena")
+  val states = List("Antioquia", "Cundinamarca", "Valle", "Atlántico", "Bolívar")
+  val streets = List("Calle 10 #20-30", "Carrera 50 #40-20", "Avenida 80 #30-10", "Diagonal 75 #25-40")
+  
+  // Feeder para pagos de servicios (HU5)
+  val billPaymentFeeder = Iterator.continually(Map(
+    "accountId" -> accountIds(Random.nextInt(accountIds.length)),
+    "amount" -> (50 + Random.nextInt(950)), // Pagos entre $50 y $1000
+    "payeeName" -> payeeNames(Random.nextInt(payeeNames.length)),
+    "street" -> streets(Random.nextInt(streets.length)),
+    "city" -> cities(Random.nextInt(cities.length)),
+    "state" -> states(Random.nextInt(states.length)),
+    "zipCode" -> (10000 + Random.nextInt(90000)).toString,
+    "phoneNumber" -> s"300${Random.nextInt(9000000) + 1000000}",
+    "payeeAccountNumber" -> (100000 + Random.nextInt(900000))
   ))
 }
