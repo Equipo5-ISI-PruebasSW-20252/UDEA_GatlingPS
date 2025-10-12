@@ -12,53 +12,53 @@ class BillPaymentLoadTest extends Simulation {
     .baseUrl(url)
     .acceptHeader("application/json")
     .contentTypeHeader("application/json")
-    .check(status.in(200, 201))
 
-  // 2 Scenario Definition
+  // 2 Scenarios Definition
   
-  // Escenario: 200 usuarios concurrentes realizando pagos
-  val billPaymentScenario = scenario("HU5 - Pago de Servicios Alta Concurrencia")
+  // ESCENARIO 1: Validar carga moderada (50 usuarios)
+  val criterio1Scenario = scenario("Criterio 1 - 50 Users Steady")
     .feed(billPaymentFeeder)
-    .exec(http("bill_payment")
+    .exec(http("billpay_criterio1")
       .post("/billpay?accountId=${accountId}&amount=${amount}")
-      .body(StringBody(
-        """{
-          "name": "${payeeName}",
-          "address": {
-            "street": "${street}",
-            "city": "${city}",
-            "state": "${state}",
-            "zipCode": "${zipCode}"
-          },
-          "phoneNumber": "${phoneNumber}",
-          "accountNumber": "${payeeAccountNumber}"
-        }"""
-      )).asJson
+      .body(StringBody("""{"name":"${payeeName}","address":{"street":"${street}","city":"${city}","state":"${state}","zipCode":"${zipCode}"},"phoneNumber":"${phoneNumber}","accountNumber":${payeeAccountNumber}}""")).asJson
+      .check(status.in(200, 201))
+      .check(jsonPath("$").exists)
+      .check(responseTimeInMillis.lte(2000))
+    )
+
+  // ESCENARIO 2: Validar criterio real con 200 usuarios concurrentes
+  val criterio2Scenario = scenario("Criterio 2 - 200 Users Peak")
+    .feed(billPaymentFeeder)
+    .exec(http("billpay_criterio2")
+      .post("/billpay?accountId=${accountId}&amount=${amount}")
+      .body(StringBody("""{"name":"${payeeName}","address":{"street":"${street}","city":"${city}","state":"${state}","zipCode":"${zipCode}"},"phoneNumber":"${phoneNumber}","accountNumber":${payeeAccountNumber}}""")).asJson
       .check(status.in(200, 201))
       .check(jsonPath("$").exists)
       .check(responseTimeInMillis.lte(3000))
     )
-    .pause(1, 3) // Pausa entre pagos para simular comportamiento real
 
   // 3 Load Scenario
   setUp(
-    billPaymentScenario.inject(
-      // Rampa progresiva hasta 200 usuarios
-      rampUsersPerSec(10).to(200).during(30 seconds),
-      // Mantiene 200 usuarios concurrentes por 2 minutos
-      constantUsersPerSec(200).during(120 seconds)
+    // CRITERIO 1: 0s a 120s - Carga base
+    criterio1Scenario.inject(
+      constantUsersPerSec(50).during(120.seconds)
+    ),
+    
+    // CRITERIO 2: Carga de la HU (200 usuarios concurrentes)
+    criterio2Scenario.inject(
+      nothingFor(140.seconds),
+      rampUsersPerSec(10).to(200).during(30.seconds),
+      constantUsersPerSec(200).during(120.seconds)
     )
   ).protocols(httpConf)
   .assertions(
-    // Criterio: Tiempo de respuesta ≤ 3 segundos
-    global.responseTime.max.lte(3000),
-    global.responseTime.mean.lte(2000),
-    global.responseTime.percentile(95).lte(3000),
+    // Validaciones Criterio 1
+    details("billpay_criterio1").responseTime.percentile(95).lte(2000),
+    details("billpay_criterio1").successfulRequests.percent.gte(99),
     
-    // Criterio: Tasa de errores ≤ 1%
-    global.successfulRequests.percent.gte(99),
-    
-    // Validación adicional: No duplicaciones (validar en logs)
-    global.failedRequests.count.lte(20) // Máximo 1% de fallos en ~2000 requests
+    // Validaciones Criterio 2 (HU5)
+    details("billpay_criterio2").responseTime.max.lte(3000),
+    details("billpay_criterio2").responseTime.percentile(95).lte(3000),
+    details("billpay_criterio2").successfulRequests.percent.gte(99)
   )
 }
