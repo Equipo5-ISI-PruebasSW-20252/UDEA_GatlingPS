@@ -11,7 +11,7 @@ class PayBillLoadTest extends Simulation {
   val httpConf = http
     .baseUrl(url)
     .acceptHeader("application/json")
-    .check(status.in(200, 201))
+    .contentTypeHeader("application/json")
 
   // 2 Scenarios Definition
   
@@ -20,6 +20,17 @@ class PayBillLoadTest extends Simulation {
     .feed(payBillFeeder)
     .exec(http("paybill_criterio1")
       .post("/billpay?accountId=${accountId}&amount=${amount}")
+      .body(StringBody("""{
+        "name": "${payeeName}",
+        "address": {
+          "street": "${street}",
+          "city": "${city}",
+          "state": "${state}",
+          "zipCode": "${zipCode}"
+        },
+        "phoneNumber": "${phoneNumber}",
+        "accountNumber": ${accountId}
+      }""")).asJson
       .check(status.in(200, 201))
       .check(jsonPath("$").exists)
       .check(responseTimeInMillis.lte(2000))
@@ -30,6 +41,17 @@ class PayBillLoadTest extends Simulation {
     .feed(payBillFeeder)
     .exec(http("paybill_criterio2")
       .post("/billpay?accountId=${accountId}&amount=${amount}")
+      .body(StringBody("""{
+        "name": "${payeeName}",
+        "address": {
+          "street": "${street}",
+          "city": "${city}",
+          "state": "${state}",
+          "zipCode": "${zipCode}"
+        },
+        "phoneNumber": "${phoneNumber}",
+        "accountNumber": ${accountId}
+      }""")).asJson
       .check(status.in(200, 201))
       .check(jsonPath("$").exists)
       .check(responseTimeInMillis.lte(3000))
