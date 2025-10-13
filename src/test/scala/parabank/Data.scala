@@ -32,16 +32,10 @@ object Data {
   val states = List("Antioquia", "Cundinamarca", "Valle", "Atlántico", "Bolívar")
   val streets = List("Calle 10 #20-30", "Carrera 50 #40-20", "Avenida 80 #30-10", "Diagonal 75 #25-40")
   
-  // Feeder para pagos de servicios (HU5)
-  val billPaymentFeeder = Iterator.continually(Map(
+  // Feeder para pago de servicios (usado en HU5 - PayBill)
+  val payBillFeeder = Iterator.continually(Map(
     "accountId" -> accountIds(Random.nextInt(accountIds.length)),
-    "amount" -> (50 + Random.nextInt(950)), // Pagos entre $50 y $1000
-    "payeeName" -> payeeNames(Random.nextInt(payeeNames.length)),
-    "street" -> streets(Random.nextInt(streets.length)),
-    "city" -> cities(Random.nextInt(cities.length)),
-    "state" -> states(Random.nextInt(states.length)),
-    "zipCode" -> (10000 + Random.nextInt(90000)).toString,
-    "phoneNumber" -> s"300${Random.nextInt(9000000) + 1000000}",
-    "payeeAccountNumber" -> (100000 + Random.nextInt(900000))
+    "amount" -> (50 + Random.nextInt(1000))
   ))
 }
+
