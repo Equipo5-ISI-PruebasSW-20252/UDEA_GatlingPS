@@ -5,7 +5,7 @@ import io.gatling.http.Predef._
 import scala.concurrent.duration._
 import parabank.Data._
 
-class BillPaySimulation extends Simulation {
+class PayBillLoadTest extends Simulation {
 
   val httpConf = http
     .baseUrl("https://parabank.parasoft.com/parabank/services/bank")
