@@ -15,7 +15,7 @@ class PayBillLoadTest extends Simulation {
 
   // 2 Scenarios Definition
   
-  // ESCENARIO 1: Validar carga moderada (100 usuarios)
+  // ESCENARIO 1: Validar carga (200 usuarios)
   val criterio1Scenario = scenario("Criterio 1 - 200 Users Steady")
     .feed(csv("billpay-data.csv").circular) // Feeder desde CSV
     .exec(http("paybill_criterio1")
@@ -23,20 +23,21 @@ class PayBillLoadTest extends Simulation {
       .queryParam("accountId", "${accountId}")
       .queryParam("amount", "${amount}")
       .check(status.in(200, 201))
+      .check(responseTimeInMillis.lte(3000)) // Criterio: ≤3s
       .check(jsonPath("$").exists)
     )
 
   // 3 Load Scenario
   setUp(
     // CRITERIO 1: Carga de la HU
-    criterio2Scenario.inject(
+    criterio1Scenario.inject(
       rampUsersPerSec(10).to(200).during(30 seconds),
       constantUsersPerSec(200).during(120 seconds)
     )
   ).protocols(httpConf)
   .assertions(
-    // Validaciones finales para ambos criterios
-    global.responseTime.percentile(95).lte(3000), 
-    global.successfulRequests.percent.gte(99) 
+    details("paybill_criterio1").responseTime.percentile(95).lte(3000),
+    details("paybill_criterio1").successfulRequests.percent.gte(99),
+    
   )
 }
