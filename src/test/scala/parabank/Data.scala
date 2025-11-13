@@ -5,14 +5,14 @@ import scala.util.Random
 object Data {
   
   val url = "https://parabank.parasoft.com/parabank/services/bank"
-  val username = "john"
-  val password = "demo"
+  val username = "usr"
+  val password = "pass"
   
   // Cuentas existentes verificadas
-  val accountIds = List(19671, 19782, 19893, 20004, 20115)
+  val accountIds = List(14787, 15342, 15453, 15564, 15675)
   
   // Customer IDs reales verificados
-  val validCustomerIds = List(18206, 18317, 18428, 18539, 18650)
+  val validCustomerIds = List(13544, 13877, 14099, 14210, 14432)
   
   val accountFeeder = Iterator.continually(Map(
     "accountId" -> accountIds(Random.nextInt(accountIds.length))
